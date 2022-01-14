@@ -1,0 +1,7 @@
+{
+  "name": "NFTickets-client",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
