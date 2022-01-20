@@ -13,11 +13,14 @@
         </ion-toolbar>
       </ion-header>
 
-      <div>
-        {{ addressInfo }}
-      </div>
-      <div>
-        {{ addressBalance }}
+      <div id="container">
+        <div>Address: {{ testAccountAddress }}</div>
+        <div>Balance: {{ addressBalance }}</div>
+        <button v-on:click="createEvent">Create Event</button>
+        <div>
+          Number of events:
+          {{ eventCount }}
+        </div>
       </div>
     </ion-content>
   </ion-page>
@@ -31,19 +34,36 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/vue";
-import { defineComponent, onMounted } from "vue";
+import { defineComponent, onMounted, onBeforeMount } from "vue";
 import { ethers, utils } from "ethers";
+import EventFactoryAbi from "../contracts/EventFactoryAbi";
 
 // TODO: Find better way to get rid of the error on window.ethereum
 declare var window: any;
 
 export default defineComponent({
   data() {
-    const addressInfo = "";
+    const testAccountAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
     const addressBalance = "";
+    const eventCount = 0;
+    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    const signer = provider.getSigner();
+    const contractAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
+    const eventFactoryContract = new ethers.Contract(
+      contractAddress,
+      EventFactoryAbi,
+      provider
+    );
+    const eventFactoryWithSigner = eventFactoryContract.connect(signer);
     return {
-      addressInfo,
+      testAccountAddress,
       addressBalance,
+      eventCount,
+      provider,
+      signer,
+      contractAddress,
+      eventFactoryContract,
+      eventFactoryWithSigner,
     };
   },
   components: {
@@ -54,23 +74,16 @@ export default defineComponent({
     IonToolbar,
   },
   async created() {
-    // A Web3Provider wraps a standard Web3 provider, which is
-    // what MetaMask injects as window.ethereum into each page
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-    // The MetaMask plugin also allows signing transactions to
-    // send ether and pay to change state within the blockchain.
-    // For this, you need the account signer...
-    const signer = provider.getSigner();
-
-    onMounted(async () => {
-      // Get the balance of an account (by address or ENS name, if supported by network)
-      var balance = await provider.getBalance(
-        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
-      );
-      this.addressInfo = "Address: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+    onBeforeMount(async () => {
+      var balance = await this.provider.getBalance(this.testAccountAddress);
       this.addressBalance = utils.formatEther(balance) + " eth";
     });
+  },
+  methods: {
+    async createEvent() {
+      await this.eventFactoryWithSigner.createEvent("Name", "Location", 100);
+      this.eventCount = await this.eventFactoryContract.getNumberOfEvents();
+    },
   },
 });
 </script>
@@ -84,23 +97,5 @@ export default defineComponent({
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-}
-
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
 }
 </style>
