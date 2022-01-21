@@ -152,6 +152,41 @@ export default [
   },
   {
     inputs: [],
+    name: "getEvents",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "location",
+            type: "string",
+          },
+          {
+            internalType: "uint32",
+            name: "capacity",
+            type: "uint32",
+          },
+          {
+            internalType: "uint256[]",
+            name: "tickets",
+            type: "uint256[]",
+          },
+        ],
+        internalType: "struct EventFactory.Event[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "getNumberOfEvents",
     outputs: [
       {
