@@ -81,7 +81,12 @@ export default defineComponent({
   },
   methods: {
     async createEvent() {
-      await this.eventFactoryWithSigner.createEvent("Name", "Location", 100);
+      var createEventTx = await this.eventFactoryWithSigner.createEvent(
+        "Name",
+        "Location",
+        100
+      );
+      await createEventTx.wait();
       this.eventCount = await this.eventFactoryContract.getNumberOfEvents();
     },
   },
